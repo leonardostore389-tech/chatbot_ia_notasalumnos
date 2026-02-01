@@ -223,12 +223,7 @@ POST /api/chat
 - [ ] App móvil nativa
 - [ ] Sistema de asistencias
 
-## 👨‍💻 Autor
 
-**Tu Nombre**
-- LinkedIn: [tu-perfil](https://linkedin.com/in/tu-perfil)
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- Email: tu-email@ejemplo.com
 
 ## 📄 Licencia
 
