@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Lista de Alumnos - Educator AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+            transition: background 0.3s ease;
+        }
+
+        .aprobado {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .desaprobado {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .nota-alta {
+            background: #d1fae5;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #065f46;
+        }
+
+        .nota-baja {
+            background: #fee2e2;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #991b1b;
+        }
+
+        .nota-media {
+            background: #fef3c7;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #ef4444;
+            font-size: 1.2em;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Educator AI - Gestión de Alumnos</h1>
+            <p>Sistema de seguimiento académico en tiempo real</p>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <h3 id="totalAlumnos">0</h3>
+                <p>Total de Alumnos</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalAprobados" style="color: #10b981;">0</h3>
+                <p>Aprobados</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalDesaprobados" style="color: #ef4444;">0</h3>
+                <p>Desaprobados</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="promedioGeneral">0.0</h3>
+                <p>Promedio General</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="content" class="loading">
+                Cargando datos...
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="cargarAlumnos()">🔄 Actualizar</button>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/alumnos';
+
+        function getNotaClass(nota) {
+            if (nota >= 14) return 'nota-alta';
+            if (nota >= 11) return 'nota-media';
+            return 'nota-baja';
+        }
+
+        function calcularPromedio(notas) {
+            return ((notas.matematica + notas.comunicacion + notas.ciencia) / 3).toFixed(2);
+        }
+
+        async function cargarAlumnos() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '<div class="loading">Cargando datos...</div>';
+
+            try {
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error('Error al obtener los datos');
+                }
+
+                const alumnos = await response.json();
+
+                if (alumnos.length === 0) {
+                    contentDiv.innerHTML = '<div class="error">⚠️ No hay alumnos registrados</div>';
+                    return;
+                }
+
+                // Calcular estadísticas
+                let totalAprobados = 0;
+                let sumaPromedios = 0;
+
+                alumnos.forEach(alumno => {
+                    const promedio = parseFloat(calcularPromedio(alumno.notas));
+                    sumaPromedios += promedio;
+                    if (promedio >= 11) totalAprobados++;
+                });
+
+                const promedioGeneral = (sumaPromedios / alumnos.length).toFixed(2);
+
+                // Actualizar estadísticas
+                document.getElementById('totalAlumnos').textContent = alumnos.length;
+                document.getElementById('totalAprobados').textContent = totalAprobados;
+                document.getElementById('totalDesaprobados').textContent = alumnos.length - totalAprobados;
+                document.getElementById('promedioGeneral').textContent = promedioGeneral;
+
+                // Crear tabla
+                let tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Grado</th>
+                                <th>Periodo</th>
+                                <th>Matemática</th>
+                                <th>Comunicación</th>
+                                <th>Ciencia</th>
+                                <th>Promedio</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                alumnos.forEach(alumno => {
+                    const promedio = calcularPromedio(alumno.notas);
+                    const estado = parseFloat(promedio) >= 11;
+                    const estadoClass = estado ? 'aprobado' : 'desaprobado';
+                    const estadoTexto = estado ? '✅ Aprobado' : '❌ Desaprobado';
+
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${alumno.nombre}</strong></td>
+                            <td>${alumno.grado}° Secundaria</td>
+                            <td>${alumno.periodo}</td>
+                            <td><span class="${getNotaClass(alumno.notas.matematica)}">${alumno.notas.matematica}</span></td>
+                            <td><span class="${getNotaClass(alumno.notas.comunicacion)}">${alumno.notas.comunicacion}</span></td>
+                            <td><span class="${getNotaClass(alumno.notas.ciencia)}">${alumno.notas.ciencia}</span></td>
+                            <td><strong>${promedio}</strong></td>
+                            <td class="${estadoClass}">${estadoTexto}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                contentDiv.innerHTML = tableHTML;
+
+            } catch (error) {
+                console.error('Error:', error);
+                contentDiv.innerHTML = '<div class="error">❌ Error al cargar los datos. Verifica que el servidor esté corriendo.</div>';
+            }
+        }
+
+        // Cargar datos al iniciar
+        cargarAlumnos();
+
+        // Auto-actualizar cada 30 segundos
+        setInterval(cargarAlumnos, 30000);
+    </script>
+</body>
+</html>
