@@ -7,7 +7,7 @@
 
 ## 📋 Descripción
 
-**Educator AI** es un sistema inteligente de gestión académica que combina una API REST robusta con inteligencia artificial para el seguimiento y análisis del rendimiento estudiantil. El sistema permite gestionar estudiantes, visualizar métricas académicas en tiempo real y realizar consultas inteligentes mediante un chatbot educativo potenciado por IA.
+**Educator AI** es un sistema inteligente de gestión académica que combina una API REST robusta con inteligencia artificial para el seguimiento y análisis del rendimiento estudiantil. El sistema permite gestionar estudiantes, visualizar métricas académicas en tiempo real y realizar consultas inteligentes mediante un chatbot educativo potenciado por IA. AGREGO NO DEJA COLGAR LINK: https://drive.google.com/file/d/1k-8P4STxYrhaq76u5Rr-pxyIhzXIUMo9/view?usp=drive_link   esta el HTML del codigo para preguntar por los alumnos
 
 ## ✨ Características Principales
 
